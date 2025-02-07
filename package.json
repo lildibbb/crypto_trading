@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "dev": "concurrently \"bun --cwd frontend run dev\" \"bun --cwd backend run server\""
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "dotenv": "^16.4.7"
+  }
+}
