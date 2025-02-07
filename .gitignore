@@ -5,3 +5,8 @@ venv/
 node_modules/
 
 .env
+
+# Ignore database
+migrations/
+
+__pycache__

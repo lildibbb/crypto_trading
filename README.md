@@ -21,6 +21,7 @@ A full-stack crypto trading bot application built with modern web technologies. 
 - **Python** 🐍
 - **TortoiseORM** 🗄️
 - **PostgreSQL** 🐘
+- **aerich**
 
 ---
 
