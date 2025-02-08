@@ -4,6 +4,9 @@ import asyncio
 import subprocess
 import shutil
 from database import init_db
+from tortoise import Tortoise
+from tortoise.transactions import in_transaction  # ✅ Import in_transaction
+from models import MarketData  # ✅ Import MarketData model
 
 # Function to check if a command exists
 def check_dependency(command, required=False):
@@ -26,6 +29,7 @@ def check_dependency(command, required=False):
             return  # Exit function
     except Exception as e:
         print(f"⚠️ Warning: `{command}` check failed, but continuing... ({e})")
+
 # Ensure required dependencies are installed
 check_dependency("hypercorn", required=True)  # Required for starting the server
 check_dependency("aerich", required=False)  # Optional (migration commands will still work)
@@ -55,16 +59,20 @@ def reset_db():
     asyncio.run(init_db())
     print("✅ Database has been reset.")
 
+async def flush():
+    """Ensure Tortoise is initialized before flushing data."""
+    await Tortoise.init(
+        db_url= os.getenv("DATABASE_URL"),
+        modules={"models": ["models"]}
+    )
+    async with in_transaction():
+        await MarketData.all().delete()
+    print("✅ MarketData table flushed.")
+
+    await Tortoise.close_connections()  # Close DB connections after flushing
+
 def flush_db():
-    """Delete all records from the MarketData table"""
-    from tortoise.transactions import in_transaction
-    from models import MarketData
-
-    async def flush():
-        async with in_transaction():
-            await MarketData.all().delete()
-        print("✅ MarketData table flushed.")
-
+    """Wrapper function to run the async flush()"""
     print("🗑️  Flushing MarketData table...")
     asyncio.run(flush())
 
@@ -74,7 +82,7 @@ COMMANDS = {
     "initdb": run_init_db,  # ✅ Added missing `initdb` command
     "migrate": run_migrations,
     "resetdb": reset_db,
-    "flushdb": flush_db,
+    "flushdb": flush_db,  # ✅ Now correctly defined
 }
 
 if __name__ == "__main__":
