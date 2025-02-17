@@ -7,7 +7,7 @@ export const Route = createFileRoute("/")({
 
 function RouteComponent() {
   return (
-    <div className="min-h-screen bg-black text-white p-4">
+    <div className="min-h-screen m-5">
       <ChartComponent /> {/* Render the chart component */}
     </div>
   );
