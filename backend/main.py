@@ -12,17 +12,7 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__)) + "/../"
 load_dotenv(dotenv_path=os.path.join(ROOT_DIR, ".env"))
 
 app = FastAPI()
-clients = []  # WebSocket clients list
-
-@app.on_event("startup")
-async def startup_event():
-    """Initialize DB and start Binance WebSocket streaming on FastAPI startup"""
-    asyncio.create_task(binance_websocket(clients))  # Pass `clients` list to Binance WebSocket
-
-@app.get("/")
-async def root():
-    return {"message": "FastAPI with WebSockets for real-time crypto!"}
-
+clients: list[WebSocket] = []  # WebSocket clients list
 # Register TortoiseORM with FastAPI
 register_tortoise(
     app,
@@ -31,11 +21,20 @@ register_tortoise(
     generate_schemas=True,
     add_exception_handlers=True,
 )
+@app.on_event("startup")
+async def startup_event():
+    """Initialize DB and start Binance WebSocket streaming on FastAPI startup"""
+    asyncio.create_task(binance_websocket(clients))  # Pass `clients` list to Binance WebSocket
+
+
+@app.get("/test")
+async def test_message():
+    return {"message": "Hello, FastAPI!"}
 
 # Endpoint to get market data (historical)
 @app.get("/MarketData")
 async def get_market_data():
-    """Fetch market data from the database."""
+    """Fetch market data from the databases."""
     return await MarketData.all()
 
 # FastAPI WebSocket for frontend clients
@@ -47,15 +46,8 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             await asyncio.sleep(1)  # Keep connection alive
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"WebSocket error: {e}")
     finally:
         clients.remove(websocket)
-
-# Delete all data from the database
-@app.delete("/flush")
-async def flush_market_data():
-    """Delete all market data from the database."""
-    async with in_transaction():
-        await MarketData.all().delete()
-    return {"message": "Market data flushed successfully"}
+        print(f"⚠️ Client disconnected! Total clients: {len(clients)}")

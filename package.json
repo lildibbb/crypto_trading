@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev": "concurrently \"bun --cwd frontend run dev\" \"bun --cwd backend run server\""
+    "dev": "bunx --bun concurrently -n \"frontend,backend\" -c \"green,red\" \"cd frontend && bun run dev\" \"cd backend && .\\venv\\Scripts\\activate && python scripts.py start\""
   },
   "dependencies": {},
   "devDependencies": {

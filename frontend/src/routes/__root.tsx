@@ -1,15 +1,17 @@
-import * as React from "react";
 import { Outlet, createRootRoute } from "@tanstack/react-router";
 
 export const Route = createRootRoute({
-  component: RootComponent,
-});
+  // beforeLoad: ({ context }) => {
+  // 	if (!context.auth.isAuthenticated) {
+  // 		throw redirect({ to: "/login" });
+  // 	}
+  // 	// Redirect root to dashboard
+  // 	throw redirect({ to: "/dashboard" });
+  // },
 
-function RootComponent() {
-  return (
-    <React.Fragment>
-      <div>Hello "__root"!</div>
+  component: () => (
+    <div className="min-h-screen  ">
       <Outlet />
-    </React.Fragment>
-  );
-}
+    </div>
+  ),
+});

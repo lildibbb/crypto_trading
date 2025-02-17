@@ -10,3 +10,4 @@ node_modules/
 migrations/
 
 __pycache__
+backend/__pycache__/

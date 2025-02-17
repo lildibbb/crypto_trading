@@ -8,6 +8,10 @@ from tortoise import Tortoise
 from tortoise.transactions import in_transaction  # ✅ Import in_transaction
 from models import MarketData  # ✅ Import MarketData model
 
+
+# ✅ Force UTF-8 encoding (Fix UnicodeEncodeError)
+sys.stdout.reconfigure(encoding='utf-8')
+
 # Function to check if a command exists
 def check_dependency(command, required=False):
     """Check if a command is available and optionally exit if required."""
