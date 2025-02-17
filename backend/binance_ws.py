@@ -17,24 +17,30 @@ async def binance_websocket(clients):
             kline_data = {
                 "symbol": data["s"],
                 "interval": kline["i"],
-                "open_price": float(kline["o"]),
-                "high_price": float(kline["h"]),
-                "low_price": float(kline["l"]),
-                "close_price": float(kline["c"]),
+                "k": { 
+                    "o": float(kline["o"]),  # open price
+                    "h": float(kline["h"]),  # high price
+                    "l": float(kline["l"]),  # low price
+                    "c": float(kline["c"]),  # close price
+                },
                 "volume": float(kline["v"]),
                 "trades": int(kline["n"]),
-                "final_kline": kline["x"]  # True if kline is complete
+                "final_kline": kline["x"]
             }
 
             # Save to database using an async transaction
             async with in_transaction():
                 await MarketData.create(**kline_data)
 
+            # Log messages to confirm data is being sent
+            print(f"Sending data to {len(clients)} clients: {kline_data}")
+
             # Send data to all connected WebSocket clients
-            if clients:
-                for client in clients:
+            for client in clients[:]:  # Use a copy of the list to avoid iteration issues
+                try:
                     await client.send_json(kline_data)
+                except Exception as e:
+                    print(f"⚠️ Error sending data: {e}")
+                    clients.remove(client)  # Remove disconnected clients
 
-            print(f"Sent to frontend: {kline_data}")
-
-
+            await asyncio.sleep(1)  # Prevent flooding
